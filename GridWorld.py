@@ -51,10 +51,46 @@ class GridWorld(object):
         
                 self.R[(i, j)] = 0 if (i, j) in self.terminate else -1
         
-                       
+
+def V_to_array(V, shape=(4,4)):
+    """dict V to array V"""
+    array_V = np.zeros(shape)
+    for key, value in V.iteritems():  
+        array_V[key[0]][key[1]]=value
+    
+    return array_V
+                   
+def policy_to_array(policy, shape=(4,4)):
+    """dict policy to array polict"""
+    array_policy = np.zeros(shape)
+    for key, action in policy.iteritems():
+        best_a = 0
+        for a  in xrange(nAction):
+            if policy[key][a] > policy[key][best_a]:
+                best_a = a
+                
+        array_policy[key[0]][key[1]] = best_a
+    return array_policy
+
+def policy_0(shape=(4, 4)):
+    """policy method return a dictionary
+    
+    policy = dictionary {s:{a:prob}} - a probability from state s
+        choosing action a
+    
+    policy_0 has an equal probability
+    """
+    policy = {}
+    for i in xrange(shape[0]):
+        for j in xrange(shape[1]):
+            policy[(i, j)] = {0: .25, 1: .25, 2: .25, 3: .25}               
+    return policy
+    
 def policy_1(shape=(4, 4)):
-    """policy method return a dictionary policy={s:{a:prob}}
-    a probability from state s choosing action a
+    """policy method return a dictionary
+    
+    policy = dictionary {s:{a:prob}} - a probability from state s
+        choosing action a
     
     policy_1 has a random probability
     """
@@ -69,22 +105,12 @@ def policy_1(shape=(4, 4)):
             for a in xrange(nAction):
                 policy[(i, j)][a] = action_prob[a]
     return policy
-                      
-def policy_0(shape=(4, 4)):
-    """policy method return a dictionary policy={s:{a:prob}}
-    a probability from state s choosing action a
-    
-    policy_0 has an equal probability
-    """
-    policy = {}
-    for i in xrange(shape[0]):
-        for j in xrange(shape[1]):
-            policy[(i, j)] = {0: .25, 1: .25, 2: .25, 3: .25}               
-    return policy
 
 def policy_2(shape=(4, 4)):
-    """policy method return a dictionary policy={s:{a:prob}}
-    a probability from state s choosing action a
+    """policy method return a dictionary
+    
+    policy = dictionary {s:{a:prob}} - a probability from state s
+        choosing action a
     
     policy_2 has an equal probability but only going to north and west
     """
@@ -94,7 +120,7 @@ def policy_2(shape=(4, 4)):
             policy[(i,j)] = {0: .5, 1: .5, 2: 0, 3: 0}               
     return policy
     
-def policy_evaluation(policy, env, discount=1, shape=(4,4)):
+def policy_evaluation(policy, env, discount=1, shape=(4,4), epsilon=0.00001):
     """policy evaluation from Sutton's Book
     
     V = tuple (row,vcol) - value of state s (row, col)
@@ -115,18 +141,47 @@ def policy_evaluation(policy, env, discount=1, shape=(4,4)):
                                 discount * V[(next_state[0], next_state[1])]))                    
                 V[(i, j)] = newVal
                 eror = max(eror, np.abs(V[(i, j)] - last_V[(i, j)]))
-        if eror < 0.00001:
+        if eror < epsilon:
             break
+    print "V result"
+    print V_to_array(V)
+    return V
     
-    # transfer value from dict to list for printing purpose
-    view_V = np.zeros(shape)
-    for key, value in V.iteritems():  
-        view_V[key[0]][key[1]]=value
-                   
-    print view_V
+def policy_iteration(policy, env, shape=(4,4), discount=1):
+      
+    while True:
+        V = policy_evaluation(policy, env)
+        last_policy = policy.copy()
+        for i in xrange(shape[0]):
+            for j in xrange(shape[1]):
+
+                best_v = -10000000
+                best_a = 0
+                if V[(max(i-1,0),j)] > best_v:
+                    best_v = V[(max(i-1, 0), j)]
+                    best_a = UP
+                if V[(min(i+1, shape[0]-1), j)] > best_v:
+                    best_v = V[(min(i+1, shape[0]-1), j)]
+                    best_a = DOWN
+                if V[(i, max(j-1, 0))] > best_v:
+                    best_v = V[(i, max(j-1, 0))]
+                    best_a = LEFT
+                if V[(i, min(j+1, shape[1]-1))] > best_v:
+                    best_v = V[(i, min(j+1, shape[1]-1))]
+                    best_a = RIGHT
+                
+                for a in xrange(nAction):
+                    policy[(i,j)][a]=1 if a==best_a else 0
+        
+        if last_policy==policy:
+            break
+    print "Result Policy"
+    print policy_to_array(policy)
 
 if __name__ == "__main__":
     shape = (4, 4)
     policy = policy_0()
+    print "Initial Policy"
+    print policy_to_array(policy)
     env = GridWorld(terminate=[(0, 0), (3, 3)])
-    policy_evaluation(policy, env)
+    policy_iteration(policy, env)
