@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jan 11 21:56:33 2017
+
+@author: RianAdam
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jan 11 11:52:17 2017
 
 @author: RianAdam
 """
 import numpy as np
+from collections import defaultdict
 
 deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
@@ -104,32 +112,65 @@ class BlackJack(object):
         return self.state(), self.done, reward
         
 
-"""Below is an example how to use black jack environment
-
-Run this code in intrepreter and there are 2 actions:
-    act(1)/act(0) : hit or stick
-    reset() : start/reset the game
-""" 
-
 env = BlackJack()    
-    
-def print_state( pl_score, de_score, use_ace, reward=0):
-    if env.done:
-        print "== Game Over =="
-        print "Reward: {}".format(reward)
-    print "Player: {} | Dealer: {} | Usable Ace: {}".format(
-                pl_score, de_score, use_ace)
-    
-    # You shouldn't print deck list
-    print "Player Deck: {}".format(env.player)
-    print "Dealer Deck: {}".format(env.dealer)
 
-def act(hit, env=env):
-    state, done, reward = env.act(hit)
-    pl_score, de_score, use_ace = state
-    print_state(pl_score, de_score, use_ace, reward)
+def policy_0(pl_score, de_score, use_ace):
     
-def reset(env=env):
-    env.reset()
-    pl_score, de_score, use_ace = env.state()
-    print_state(pl_score, de_score, use_ace)
+    # Using probability instead of actual act number for consistency
+    return np.array([1.0, 0.0]) if pl_score >= 20 else np.array([0.0, 1.0])
+    
+def mc_policy_evaluation(policy, n_episodes, env=env):
+    
+    # Make a dictionary with deafult value 0.0
+    V = defaultdict(float)
+    
+    for e in xrange(n_episodes):
+        
+        # An episode is a list of tuple (state, action, reward)
+        # Choosen action here is not really needed for evaluation
+        # But written for consistency 
+        episode = []
+        state = env.state()
+        terminate = False
+        
+        # Generate one episode
+        while not terminate:
+            # Chosen action
+            act_prob = policy(*state)
+            action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
+            
+            # Save this state
+            episode.append(state)
+            
+            # Get next state
+            next_state, done, reward = env.act(action)
+            
+            if done:
+                # Save last state
+                episode.append(next_state)
+                terminate = True
+            
+            state = next_state
+                
+        print episode
+            
+mc_policy_evaluation(policy_0, 1)
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
