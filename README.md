@@ -3,9 +3,11 @@ I'm trying to implement some reinforcement-learning algorithms. Most of my imple
 
 ## Table of content
 
-- [Grid World][4] (Policy Evaluation, Policy Iteration, Value Iteration)
+- [Grid World][4] (Environment, DP-Policy Evaluation, DP-Policy Iteration, DP-Value Iteration)
+- [Black Jack][5] (Environment)
 
 [1]: https://webdocs.cs.ualberta.ca/~sutton/book/bookdraft2016sep.pdf
 [2]: https://www.youtube.com/watch?v=2pWv7GOvuf0
 [3]: https://github.com/dennybritz/reinforcement-learning
 [4]: https://github.com/rianrajagede/reinforcement-learning/blob/master/GridWorld.py
+[5]: https://github.com/rianrajagede/reinforcement-learning/blob/master/BlackJack_env.py
