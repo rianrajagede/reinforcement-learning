@@ -12,7 +12,9 @@ Created on Wed Jan 11 11:52:17 2017
 @author: RianAdam
 """
 import numpy as np
+
 from collections import defaultdict
+from lib import plotting
 
 deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
@@ -119,10 +121,13 @@ def policy_0(pl_score, de_score, use_ace):
     # Using probability instead of actual act number for consistency
     return np.array([1.0, 0.0]) if pl_score >= 20 else np.array([0.0, 1.0])
     
-def mc_policy_evaluation(policy, n_episodes, env=env):
+    
+def mc_policy_evaluation(policy, n_episodes, alfa=0.05, env=env):
     
     # Make a dictionary with deafult value 0.0
     V = defaultdict(float)
+    rewardsum = defaultdict(float)
+    counter = defaultdict(float)
     
     for e in xrange(n_episodes):
         
@@ -130,31 +135,57 @@ def mc_policy_evaluation(policy, n_episodes, env=env):
         # Choosen action here is not really needed for evaluation
         # But written for consistency 
         episode = []
-        state = env.state()
+        env.reset()
+        now_state = env.state()
         terminate = False
         
         # Generate one episode
         while not terminate:
             # Chosen action
-            act_prob = policy(*state)
+            act_prob = policy(*now_state)
             action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
             
-            # Save this state
-            episode.append(state)
-            
-            # Get next state
+            # Action
             next_state, done, reward = env.act(action)
             
+            # Save this state
+            episode.append((now_state, action, reward))                        
             if done:
-                # Save last state
-                episode.append(next_state)
                 terminate = True
             
-            state = next_state
-                
-        print episode
+            # Move to the next state
+            now_state = next_state
+        
+        # Monte-carlo updates for non-stationary problem
+#        for i, data in enumerate(episode):
+#            state = data[0]
+#            G = sum(data[2] for data in episode[i:])
+#            V[state] = V[state] + alfa*(G - V[state])
+#            
+        for i, data in enumerate(episode):
             
-mc_policy_evaluation(policy_0, 1)
+            state = data[0]
+            G = sum(data[2] for data in episode[i:])
+            
+            counter[state] += 1
+            rewardsum[state] += G
+            
+            V[state] = rewardsum[state] / counter[state]
+            
+        
+    return V
+        
+            
+# Using plotting library from Denny Britz repo
+V_10k = mc_policy_evaluation(policy_0, n_episodes=10000)
+
+# Delete state with player score below 12 to make it same with example
+new_V = {}
+for key, data in V_10k.iteritems():
+    if key[0] >= 12:
+        new_V[key] = data
+
+plotting.plot_value_function(new_V, title="10,000 Steps")
             
             
             
