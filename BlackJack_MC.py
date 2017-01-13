@@ -119,8 +119,10 @@ def policy_0(pl_score, de_score, use_ace):
 
 def policy_epsilon(Q, epsilon, state):
     """Policy-epsilon :
-       - epsilon probability choosing random action
-       - 1-epsilon probability choosing action wich has maximum Q value
+	   - always hit when player score < 12
+	   - otherwise:
+		   - epsilon probability choosing random action
+		   - 1-epsilon probability choosing action wich has maximum Q value
     """
     
     # Greedy choose hit when score < 12
