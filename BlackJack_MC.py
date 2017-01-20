@@ -176,7 +176,7 @@ def mc_policy_evaluation(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
         # Monte-carlo First-Visit updates for non-stationary problem
 #        for i, data in enumerate(episode):
 #            state = data[0]
-#            G = sum(data[1] for data in episode[i:])
+#            G = sum(data[1]*(discount**ix) for ix,data in enumerate(episode[i:]))
 #            
 #            # Incremental average
 #            V[state] = V[state] + alfa*(G - V[state])
@@ -187,15 +187,17 @@ def mc_policy_evaluation(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
             state = data[0]
             
             # data[1] is an actual reward
-            G = sum(data[1]*(discount**i) for i,data in enumerate(episode[i:]))
+            G = sum(data[1]*(discount**ix) for ix, data in enumerate(episode[i:]))
             
             # in Black Jack in one episode, you'll only see a state once
             # so you don't need to find another same state
             counter[state] += 1
             rewardsum[state] += G
             
-            # Incremental average
+            # average (this is a sutton's book style)
             V[state] = rewardsum[state] / counter[state]
+            # below is David silver's style using incremental average
+#            V[state] = V[state] + (1.0/counter[state])*(G - V[state])
             
     return V        
 
@@ -241,12 +243,12 @@ def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, discount=1.0, env
             action = data[1]
             
             # data[2] is an actual reward
-            G = sum(data[2]*(discount**i) for i,data in enumerate(episode[i:]))
+            G = sum(data[2]*(discount**ix) for ix, data in enumerate(episode[i:]))
             
             counter[state] += 1
             rewardsum[state] += G
         
-            # Incremental average
+            # average
             Q[state][action] = rewardsum[state] / counter[state]
             
     return Q, policy
@@ -270,64 +272,64 @@ plotting.plot_value_function(new_V, title="Policy_0 Evaluation")
 
 """Block code below optimize Q by a policy and return Q and plotted V-value
 """
-print "MONTE-CARLO CONTROL OPTIMIZE THE POLICY AND Q-VALUE"
-
-Q, policy = mc_control_epsilon_greedy(policy_epsilon, n_episodes=100000)
-
-# For plotting purpose, find V-value from Q-Value
-V = defaultdict(float)
-for state, actions in Q.iteritems():
-    action_value = max(actions)
-    V[state] = action_value
-    
-# Delete state with player score below 12 to make it same with example
-new_V = defaultdict(float)
-for key, data in V.iteritems():
-    if key[0] >= 12:
-        new_V[key] = data
-
-# Using plotting library from Denny Britz repo
-plotting.plot_value_function(new_V, title="Optimal Value Function")
-            
-
-"""Block code below using optimized Q-value and policy before,
-Then run it on a game
-"""           
-print "SIMULATE THE OPTIMIZED POLICY AND Q-VALUE"
-
-def print_state( pl_score, de_score, use_ace, reward=0):
-    if env.done:
-        print "== Game Over =="
-        print "Reward: {}".format(reward)
-    print "Player: {} | Dealer: {} | Usable Ace: {}".format(
-                pl_score, de_score, use_ace)
-    
-    # You shouldn't print deck list
-    print "Player Deck: {}".format(env.player)
-    print "Dealer Deck: {}".format(env.dealer)
-
-def act(hit, env=env):
-    state, done, reward = env.act(hit)
-    pl_score, de_score, use_ace = state
-    print_state(pl_score, de_score, use_ace, reward)
-    return state, done, reward
-    
-def reset(env=env):
-    env.reset()
-    pl_score, de_score, use_ace = env.state()
-    print_state(pl_score, de_score, use_ace)
-    return pl_score, de_score, use_ace
-
-state = reset()
-done = False
-while not done:
-    print ""
-    act_prob = policy(Q, 0.1, state)
-    action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
-    print "action: HIT" if action==1 else "action: STICK"
-    state, done, reward = act(action)
-    
-    
+#print "MONTE-CARLO CONTROL OPTIMIZE THE POLICY AND Q-VALUE"
+#
+#Q, policy = mc_control_epsilon_greedy(policy_epsilon, n_episodes=100000)
+#
+## For plotting purpose, find V-value from Q-Value
+#V = defaultdict(float)
+#for state, actions in Q.iteritems():
+#    action_value = max(actions)
+#    V[state] = action_value
+#    
+## Delete state with player score below 12 to make it same with example
+#new_V = defaultdict(float)
+#for key, data in V.iteritems():
+#    if key[0] >= 12:
+#        new_V[key] = data
+#
+## Using plotting library from Denny Britz repo
+#plotting.plot_value_function(new_V, title="Optimal Value Function")
+#            
+#
+#"""Block code below using optimized Q-value and policy before,
+#Then run it on a game
+#"""           
+#print "SIMULATE THE OPTIMIZED POLICY AND Q-VALUE"
+#
+#def print_state( pl_score, de_score, use_ace, reward=0):
+#    if env.done:
+#        print "== Game Over =="
+#        print "Reward: {}".format(reward)
+#    print "Player: {} | Dealer: {} | Usable Ace: {}".format(
+#                pl_score, de_score, use_ace)
+#    
+#    # You shouldn't print deck list
+#    print "Player Deck: {}".format(env.player)
+#    print "Dealer Deck: {}".format(env.dealer)
+#
+#def act(hit, env=env):
+#    state, done, reward = env.act(hit)
+#    pl_score, de_score, use_ace = state
+#    print_state(pl_score, de_score, use_ace, reward)
+#    return state, done, reward
+#    
+#def reset(env=env):
+#    env.reset()
+#    pl_score, de_score, use_ace = env.state()
+#    print_state(pl_score, de_score, use_ace)
+#    return pl_score, de_score, use_ace
+#
+#state = reset()
+#done = False
+#while not done:
+#    print ""
+#    act_prob = policy(Q, 0.1, state)
+#    action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
+#    print "action: HIT" if action==1 else "action: STICK"
+#    state, done, reward = act(action)
+#    
+#    
             
             
             

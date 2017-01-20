@@ -3,7 +3,10 @@ I'm trying to implement some reinforcement-learning algorithms. Most of my imple
 
 ## Table of contents
 
+#### 1. Dynamic Programming
 - [Grid World][4] (Environment, DP-Policy Evaluation, DP-Policy Iteration, DP-Value Iteration)
+
+#### 2. Model-Free
 - [Black Jack][5] (Environment)
 - [Black Jack Monte-Carlo][6] (Policy Evaluation, Control, Simulation)
 
