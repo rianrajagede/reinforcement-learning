@@ -139,7 +139,7 @@ def policy_epsilon(Q, epsilon, state):
         A[best_action] = 1
         return A
     
-def mc_policy_evaluation(policy, n_episodes, alfa=0.05, env=env):
+def mc_policy_evaluation(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
     
     # Make a dictionary with deafult value 0.0
     V = defaultdict(float)
@@ -185,7 +185,9 @@ def mc_policy_evaluation(policy, n_episodes, alfa=0.05, env=env):
         # Monte-carlo First-Visit updates for stationary problem
         for i, data in enumerate(episode):
             state = data[0]
-            G = sum(data[1] for data in episode[i:])
+            
+            # data[1] is an actual reward
+            G = sum(data[1]*(discount**i) for i,data in enumerate(episode[i:]))
             
             # in Black Jack in one episode, you'll only see a state once
             # so you don't need to find another same state
@@ -197,7 +199,7 @@ def mc_policy_evaluation(policy, n_episodes, alfa=0.05, env=env):
             
     return V        
 
-def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, env=env):
+def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, discount=1.0, env=env):
     
     # Make a dictionary with deafult value 0.0
     Q = defaultdict(lambda: [0.0, 0.0])
@@ -237,7 +239,9 @@ def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, env=env):
         for i, data in enumerate(episode):
             state = data[0] 
             action = data[1]
-            G = sum(data[2] for data in episode[i:])
+            
+            # data[2] is an actual reward
+            G = sum(data[2]*(discount**i) for i,data in enumerate(episode[i:]))
             
             counter[state] += 1
             rewardsum[state] += G
