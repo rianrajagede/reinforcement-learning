@@ -9,6 +9,7 @@ I'm trying to implement some reinforcement-learning algorithms. Most of my imple
 #### 2. Model-Free
 - [Black Jack][5] (Environment)
 - [Black Jack Monte-Carlo][6] (Policy Evaluation, Control, Simulation)
+- [Black Jack Temporal-Difference (TD[0])][7] (Policy Evaluation)
 
 [1]: https://webdocs.cs.ualberta.ca/~sutton/book/bookdraft2016sep.pdf
 [2]: https://www.youtube.com/watch?v=2pWv7GOvuf0
@@ -16,3 +17,4 @@ I'm trying to implement some reinforcement-learning algorithms. Most of my imple
 [4]: https://github.com/rianrajagede/reinforcement-learning/blob/master/GridWorld.py
 [5]: https://github.com/rianrajagede/reinforcement-learning/blob/master/BlackJack_env.py
 [6]: https://github.com/rianrajagede/reinforcement-learning/blob/master/BlackJack_MC.py
+[7]: https://github.com/rianrajagede/reinforcement-learning/blob/master/BlackJack_TD.py
