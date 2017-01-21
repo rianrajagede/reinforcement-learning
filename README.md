@@ -1,5 +1,5 @@
 # Reinforcement-learning (In-progress)
-I'm trying to implement some reinforcement-learning algorithms. Most of my implementation based on three lectures:
+I'm trying to implement some reinforcement-learning algorithms. Most of my implementation based on three lectures below:
 - [Richard Sutton's & Andrew Barto's Book Reinforcement Learning: An Introduction (2nd Ed)][1]
 - [David Silver's Lecture][2]
 - [Udacity's Reinforcement-learning lecture (Georgia Tech)][9].
