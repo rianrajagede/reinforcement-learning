@@ -117,7 +117,7 @@ def policy_0(pl_score, de_score, use_ace):
     # Using probability instead of actual act number for consistency
     return np.array([1.0, 0.0]) if pl_score >= 20 else np.array([0.0, 1.0])
     
-def tdlambda_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, lmbd=0.8, env=env):
+def tdlambda_prediction(policy, n_episodes, alfa=1.0, discount=1.0, lmbd=0.8, env=env):
     
     # Make a dictionary with deafult value 0.0
     V = defaultdict(float)
@@ -135,7 +135,7 @@ def tdlambda_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, lmbd=
             act_prob = policy(*now_state)
             action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
     
-            # Action
+            # Take action
             next_state, done, reward = env.act(action)
             delta = reward + discount * V[next_state] - V[now_state]
             Z[now_state] = Z[now_state] + 1
@@ -159,7 +159,7 @@ def tdlambda_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, lmbd=
 """
 print "TEMPORAL-DIFFERENCE-LAMBDA EVALUATE POLICY_0"         
 
-V = tdlambda_policy_evaluation(policy_0, n_episodes=10000)
+V = tdlambda_prediction(policy_0, n_episodes=10000)
 
 # Delete state with player score below 12 to make it same with example
 # Because we call V[next_state] in the end, to make the same plot

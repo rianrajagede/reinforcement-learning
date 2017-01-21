@@ -139,7 +139,7 @@ def policy_epsilon(Q, epsilon, state):
         A[best_action] = 1
         return A
     
-def mc_policy_evaluation(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
+def mc_prediction(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
     
     # Make a dictionary with deafult value 0.0
     V = defaultdict(float)
@@ -161,7 +161,7 @@ def mc_policy_evaluation(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
             act_prob = policy(*now_state)
             action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
             
-            # Action
+            # Take action
             next_state, done, reward = env.act(action)
             
             # Save this state
@@ -203,7 +203,7 @@ def mc_policy_evaluation(policy, n_episodes, alfa=0.05, discount=1.0, env=env):
             
     return V        
 
-def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, discount=1.0, env=env):
+def mc_control(policy, n_episodes, epsilon=0.1, discount=1.0, env=env):    
     
     # Make a dictionary with deafult value 0.0
     Q = defaultdict(lambda: [0.0, 0.0])
@@ -227,7 +227,7 @@ def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, discount=1.0, env
             act_prob = policy(Q, epsilon, now_state)
             action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
             
-            # Action
+            # Take action
             next_state, done, reward = env.act(action)
             
             # Save this state
@@ -262,7 +262,7 @@ def mc_control_epsilon_greedy(policy, n_episodes, epsilon=0.1, discount=1.0, env
 """
 print "MONTE-CARLO EVALUATE POLICY_0"         
 
-V = mc_policy_evaluation(policy_0, n_episodes=10000)
+V = mc_prediction(policy_0, n_episodes=10000)
 
 # Delete state with player score below 12 to make it same with example
 new_V = defaultdict(float)
@@ -278,7 +278,7 @@ plotting.plot_value_function(new_V, title="Policy_0 Evaluation")
 """
 print "MONTE-CARLO CONTROL OPTIMIZE THE POLICY AND Q-VALUE"
 
-Q, policy = mc_control_epsilon_greedy(policy_epsilon, n_episodes=100000)
+Q, policy = mc_control(policy_epsilon, n_episodes=100000)
 
 # For plotting purpose, find V-value from Q-Value
 V = defaultdict(float)
