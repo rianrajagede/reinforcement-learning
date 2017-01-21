@@ -3,7 +3,8 @@ I'm trying to implement some reinforcement-learning algorithms. Most of my imple
 - [Richard Sutton's & Andrew Barto's Book Reinforcement Learning: An Introduction (2nd Ed)][1]
 - [David Silver's Lecture][2]
 - [Udacity's Reinforcement-learning lecture (Georgia Tech)][9].
-My codes are like a rewrite from [Denny Britz's Repo][3], Because I can't write such a beautiful code like he does yet :( So I try to implement many of it by myself ;)
+
+My codes are like a rewrite from [Denny Britz's Repo][3], But because I can't write such a beautiful code like he does yet :( So I try to implement many of it by myself ;)
 
 ## Table of contents
 
