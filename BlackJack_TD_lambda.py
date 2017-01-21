@@ -117,7 +117,7 @@ def policy_0(pl_score, de_score, use_ace):
     # Using probability instead of actual act number for consistency
     return np.array([1.0, 0.0]) if pl_score >= 20 else np.array([0.0, 1.0])
     
-def td_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, env=env):
+def tdlambda_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, lmbd=0.8, env=env):
     
     # Make a dictionary with deafult value 0.0
     V = defaultdict(float)
@@ -126,22 +126,28 @@ def td_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, env=env):
         env.reset()
         now_state = env.state()
         terminate = False
+        Z = defaultdict(float)
+        States = [] # all states have been through in the episode
         
         # Running an episode
         while not terminate:
             # Chosen action
             act_prob = policy(*now_state)
             action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
-            
+    
             # Action
             next_state, done, reward = env.act(action)
-                
-            # Not waiting to generate one episode for TD update
             delta = reward + discount * V[next_state] - V[now_state]
-            V[now_state] = V[now_state] + alfa * delta
-            
+            Z[now_state] = Z[now_state] + 1
+            States.append(now_state)
+                        
+            # Not waiting to generate one episode for TD update
+            for s in States:
+                V[s] = V[s] + alfa * delta * Z[s]
+                Z[s] = lmbd * discount * Z[s] 
+                
             # Move to the next state
-            now_state = next_state     
+            now_state = next_state       
             
             if done:
                 terminate = True
@@ -151,9 +157,9 @@ def td_policy_evaluation(policy, n_episodes, alfa=1.0, discount=1.0, env=env):
 
 """Block code below evaluate a policy and return a plotted V-value
 """
-print "TEMPORAL-DIFFERENCE EVALUATE POLICY_0"         
+print "TEMPORAL-DIFFERENCE-LAMBDA EVALUATE POLICY_0"         
 
-V = td_policy_evaluation(policy_0, n_episodes=10000)
+V = tdlambda_policy_evaluation(policy_0, n_episodes=10000)
 
 # Delete state with player score below 12 to make it same with example
 # Because we call V[next_state] in the end, to make the same plot
