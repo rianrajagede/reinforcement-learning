@@ -1,6 +1,3 @@
-import numpy as np
-
-nAction = 4
 UP = 0
 LEFT = 1
 DOWN = 2
@@ -22,7 +19,13 @@ class WindyGridWorld(object):
 
         for i in xrange(self.shape[0]):
             for j in xrange(self.shape[1]):
-                self.R[(i, j)] = 0 if (i, j) in self.terminate else -1
+                self.R[(i, j)] = 0 if (i, j)==self.terminate else -1
+                       
+    def state(self):
+        return self.now
+    
+    def reset(self):
+        self.start = (3, 0)
 
     def act(self, action):
         if action==UP:
@@ -34,7 +37,7 @@ class WindyGridWorld(object):
         if action==DOWN:
             self.act_down()
         self.act_up(step=self.wind[self.now[1]])
-        return (self.R[self.now], self.now)
+        return (self.state(), self.state()==self.terminate, self.R[self.state()])
 
     def act_up(self, step=1):
         self.now = (max(self.now[0]-step, 0), self.now[1])

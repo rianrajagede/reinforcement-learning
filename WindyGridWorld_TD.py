@@ -1,6 +1,7 @@
 import numpy as np
 
 from collections import defaultdict
+from WindyGridWorld import WindyGridWorld
 from lib import plotting
 
 deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
@@ -101,77 +102,37 @@ class BlackJack(object):
         return self.state(), self.done, reward
 
 
-env = BlackJack()
-
-def policy_0(pl_score, de_score, use_ace):
-    """Policy-0 : always "hit" except we got score >= 20
-    """
-
-    # Using probability instead of actual act number for consistency
-    return np.array([1.0, 0.0]) if pl_score >= 20 else np.array([0.0, 1.0])
+env = WindyGridWorld()
 
 def policy_epsilon(Q, epsilon, state):
     """Policy-epsilon :
-	   - always hit when player score < 12
-	   - otherwise:
-		   - epsilon probability choosing random action
-		   - 1-epsilon probability choosing action wich has maximum Q value
+	   - epsilon probability choosing random action
+		- 1-epsilon probability choosing action wich has maximum Q value
     """
-
-    # Greedy choose hit when score < 12
-    if state[0] < 12:
-        return [0.0, 1.0]
-
     if np.random.rand() <= epsilon:
         # Explore
-        return np.array([0.5, 0.5])
+        return np.array([.25, .25, .25, .25])
     else:
         # Exploit
         best_action = np.argmax(Q[state])
-        A = np.zeros(2)
+        A = np.zeros(4)
         A[best_action] = 1
         return A
 
-def td_prediction(policy, n_episodes, alfa=1.0, discount=1.0, env=env):
-
-    # Make a dictionary with deafult value 0.0
-    V = defaultdict(float)
-
-    for e in xrange(n_episodes):
-        env.reset()
-        now_state = env.state()
-        terminate = False
-
-        # Running an episode
-        while not terminate:
-            # Chosen action
-            act_prob = policy(*now_state)
-            action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
-
-            # Take action
-            next_state, done, reward = env.act(action)
-
-            # Not waiting to generate one episode for TD update
-            delta = reward + discount * V[next_state] - V[now_state]
-            V[now_state] = V[now_state] + alfa * delta
-
-            # Move to the next state
-            now_state = next_state
-
-            if done:
-                terminate = True
-
-    return V
-
 # td_control a.k.a SARSA
-def td_control(policy, n_episodes, alfa=1.0, epsilon=0.1, discount=1.0, env=env):
+def td_control(policy, n_episodes, alfa=0.5, epsilon=0.1, discount=1.0, env=env):
 
     # Make a dictionary with deafult value 0.0
-    Q = defaultdict(lambda: [0.0, 0.0])
+    Q = defaultdict(lambda: np.zeros(4))
+    
+    # for Denny Britz's plotting
+    # Keeps track of useful statistics
+    stats = plotting.EpisodeStats(
+        episode_lengths=np.zeros(n_episodes),
+        episode_rewards=np.zeros(n_episodes))
 
     for e in xrange(n_episodes):
-
-        env.reset()
+        print "\rEpisode " + str(e + 1) 
         now_state = env.state()
         terminate = False
 
@@ -180,13 +141,18 @@ def td_control(policy, n_episodes, alfa=1.0, epsilon=0.1, discount=1.0, env=env)
         action = np.random.choice(np.arange(len(act_prob)), p=act_prob)
 
         # Generate one episode
+        step = 0
         while not terminate:
-
+            
             # Take action
             next_state, done, reward = env.act(action)
+            
+            # Update statistics
+            stats.episode_rewards[e] += reward
+            stats.episode_lengths[e] = step
 
             # Get next action
-            next_act_prob = policy(Q, epsilon, next_state)
+            next_act_prob = policy(Q, epsilon, now_state)
             next_action = np.random.choice(np.arange(len(next_act_prob)),
                                                            p=next_act_prob)
 
@@ -198,85 +164,27 @@ def td_control(policy, n_episodes, alfa=1.0, epsilon=0.1, discount=1.0, env=env)
             # Move to the next state
             now_state = next_state
             action = next_action
-
+            step = step + 1
             if done:
                 terminate = True
 
-    return Q, policy
+    return Q, stats
 
-"""Block code below evaluate a policy and return a plotted V-value
-"""
-print "TEMPORAL-DIFFERENCE EVALUATE POLICY_0"
-
-V = td_prediction(policy_0, n_episodes=10000)
-
-# Delete state with player score below 12 to make it same with example
-# Because we call V[next_state] in the end, to make the same plot
-# we should delete some keys
-new_V = defaultdict(float)
-for key, data in V.iteritems():
-    if key[0] >= 12 and key[1]<=11 and key[0]<=21:
-        new_V[key] = data
-
-# Using plotting library from Denny Britz repo
-plotting.plot_value_function(new_V, title="Policy_0 Evaluation")
-
-
-"""Block code below optimize Q by a policy and return Q and plotted V-value
+"""Block code below optimize Q and policy then run it
 """
 print "TEMPORAL-DIFFERENCE CONTROL A.K.A SARSA OPTIMIZE THE POLICY AND Q-VALUE"
 
-Q, policy = td_control(policy_epsilon, n_episodes=10000)
+Q, stats = td_control(policy_epsilon, n_episodes=200)
+plotting.plot_episode_stats(stats)
 
-# For plotting purpose, find V-value from Q-Value
-V = defaultdict(float)
-for state, actions in Q.iteritems():
-    action_value = max(actions)
-    V[state] = action_value
-
-# Delete state with player score below 12 and dealer more than 11
-# to make it same with example
-new_V = defaultdict(float)
-for key, data in V.iteritems():
-    if key[0] >= 12 and key[1]<=11 and key[0]<=21:
-        new_V[key] = data
-
-# Using plotting library from Denny Britz repo
-plotting.plot_value_function(new_V, title="Optimal Value Function")
-
-
-"""Block code below using optimized Q-value and policy before,
-Then run it on a game
-"""
-print "SIMULATE THE OPTIMIZED POLICY AND Q-VALUE"
-
-def print_state( pl_score, de_score, use_ace, reward=0):
-    if env.done:
-        print "== Game Over =="
-        print "Reward: {}".format(reward)
-    print "Player: {} | Dealer: {} | Usable Ace: {}".format(
-                pl_score, de_score, use_ace)
-
-    # You shouldn't print deck list
-    print "Player Deck: {}".format(env.player)
-    print "Dealer Deck: {}".format(env.dealer)
-
-def act(hit, env=env):
-    state, done, reward = env.act(hit)
-    pl_score, de_score, use_ace = state
-    print_state(pl_score, de_score, use_ace, reward)
-    return state, done, reward
-
-def reset(env=env):
-    env.reset()
-    pl_score, de_score, use_ace = env.state()
-    print_state(pl_score, de_score, use_ace)
-    return pl_score, de_score, use_ace
-
-state = reset()
-done = False
-while not done:
-    print ""
-    action = 1 if state[0]<12 else np.argmax(Q[state])
-    print "action: HIT" if action==1 else "action: STICK"
-    state, done, reward = act(action)
+#print "SIMULATE THE OPTIMIZED POLICY AND Q-VALUE"
+#
+#env.reset()
+#state = env.state()
+#done = False
+#while not done:
+#    action = np.argmax(Q[state])
+#    next_state, done, reward = env.act(action)
+#    print "action: "+str(action)
+#    state = next_state
+#    print state

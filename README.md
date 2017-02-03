@@ -21,7 +21,7 @@ My codes are like a rewrite from [Denny Britz's Repo][3], But because I can't wr
 - [Black Jack Temporal-Difference (TD[0])][7] (Prediction, Control a.k.a SARSA, Simulation)
 
 #### 3. Eligibility Traces
-- [Black Jack TD-lambda][8] (Prediction)
+- [Black Jack TD-lambda][8] (Prediction
 
 [1]: https://webdocs.cs.ualberta.ca/~sutton/book/bookdraft2016sep.pdf
 [2]: https://www.youtube.com/watch?v=2pWv7GOvuf0
