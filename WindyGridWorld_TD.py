@@ -74,21 +74,24 @@ def td_control(policy, n_episodes, alfa=0.5, epsilon=0.1, discount=1.0, env=env)
 
     return Q, stats
 
-"""Block code below optimize Q and policy then run it
+"""Block code below optimize Q and policy then simulate it
 """
 print "TEMPORAL-DIFFERENCE CONTROL A.K.A SARSA OPTIMIZE THE POLICY AND Q-VALUE"
 
 Q, stats = td_control(policy_epsilon, n_episodes=200)
 plotting.plot_episode_stats(stats)
 
-#print "SIMULATE THE OPTIMIZED POLICY AND Q-VALUE"
-#
-#env.reset()
-#state = env.state()
-#done = False
-#while not done:
-#    action = np.argmax(Q[state])
-#    next_state, done, reward = env.act(action)
-#    print "action: "+str(action)
-#    state = next_state
-#    print state
+print "SIMULATE THE OPTIMIZED POLICY AND Q-VALUE"
+
+env.reset()
+state = env.state()
+done = False
+step = 0
+while not done:
+    step += 1
+    action = np.argmax(Q[state])
+    next_state, done, reward = env.act(action)
+    print "action: "+str(action)
+    state = next_state
+    print state
+print "Total Step: "+str(step)

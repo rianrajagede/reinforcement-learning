@@ -19,6 +19,7 @@ My codes are like a rewrite from [Denny Britz's Repo][3], But because I can't wr
 #### 2. Simple Model-Free
 - [Black Jack Monte-Carlo][6] (Prediction, Control, Simulation)
 - [Black Jack Temporal-Difference (TD[0])][7] (Prediction, Control a.k.a SARSA, Simulation)
+- [Windy Grid World Temporal-Difference (TD[0])][11] (Control a.k.a SARSA, Simulation)
 
 #### 3. Eligibility Traces
 - [Black Jack TD-lambda][8] (Prediction
@@ -33,3 +34,4 @@ My codes are like a rewrite from [Denny Britz's Repo][3], But because I can't wr
 [8]: https://github.com/rianrajagede/reinforcement-learning/blob/master/BlackJack_TD_lambda.py
 [9]: https://www.udacity.com/course/ud600
 [10]: https://github.com/rianrajagede/reinforcement-learning/blob/master/WindyGridWorld.py
+[10]: https://github.com/rianrajagede/reinforcement-learning/blob/master/WindyGridWorld_TD.py
