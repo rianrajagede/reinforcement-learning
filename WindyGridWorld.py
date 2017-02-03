@@ -19,13 +19,13 @@ class WindyGridWorld(object):
 
         for i in xrange(self.shape[0]):
             for j in xrange(self.shape[1]):
-                self.R[(i, j)] = 0 if (i, j)==self.terminate else -1
+                self.R[(i, j)] = 0 if (i, j)==self.terminate else -1.0
                        
     def state(self):
         return self.now
     
     def reset(self):
-        self.start = (3, 0)
+        self.now = (3, 0)
 
     def act(self, action):
         if action==UP:
@@ -46,9 +46,7 @@ class WindyGridWorld(object):
         self.now = (min(self.now[0]+step, self.shape[0]-1), self.now[1])
 
     def act_right(self, step=1):
-        self.now = (self.now[0], min(self.now[1]+1, self.shape[1]-1))
+        self.now = (self.now[0], min(self.now[1]+step, self.shape[1]-1))
 
     def act_left(self, step=1):
-        self.now = (self.now[0], max(self.now[1]-1, 0))
-        
-
+        self.now = (self.now[0], max(self.now[1]-step, 0))
