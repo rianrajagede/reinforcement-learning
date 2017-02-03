@@ -34,4 +34,4 @@ My codes are like a rewrite from [Denny Britz's Repo][3], But because I can't wr
 [8]: https://github.com/rianrajagede/reinforcement-learning/blob/master/BlackJack_TD_lambda.py
 [9]: https://www.udacity.com/course/ud600
 [10]: https://github.com/rianrajagede/reinforcement-learning/blob/master/WindyGridWorld.py
-[10]: https://github.com/rianrajagede/reinforcement-learning/blob/master/WindyGridWorld_TD.py
+[11]: https://github.com/rianrajagede/reinforcement-learning/blob/master/WindyGridWorld_TD.py
